@@ -20,11 +20,13 @@
     "verbatimModuleSyntax": true,
     "erasableSyntaxOnly": true,
     "noEmit": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   },
   "include": [
     "src",
     "sim",
+    "guide",
     "scripts",
     "vite.config.ts"
   ]

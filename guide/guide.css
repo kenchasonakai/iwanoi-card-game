@@ -1,0 +1,143 @@
+/* ルールと資料のページ。ゲームと同じ色（和紙、墨、朱、金、藍）で、読み物として明るい地にする */
+
+:root {
+  --washi: #f6f1e6;
+  --paper: #fffdf8;
+  --line: #e2d8c4;
+  --sumi: #2b2a28;
+  --dim: #6b665c;
+  --shu: #b3412e;
+  --kin: #c7a046;
+  --kin-soft: #f1e3bd;
+  --ai: #2f4858;
+  --night: #1f2a31;
+  --night-deep: #15171b;
+  --good: #4f7a3f;
+  --body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --mincho: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --brush: "Yuji Syuku", "Shippori Mincho B1", serif;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--washi);
+  color: var(--sumi);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.85;
+  -webkit-text-size-adjust: 100%;
+}
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--ai); }
+
+.wrap { width: 100%; max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+
+/* 見出しの帯 */
+.hero {
+  background: radial-gradient(circle at 80% 30%, rgba(199, 160, 70, 0.14), transparent 55%), var(--night-deep);
+  color: #f3ede0;
+  padding: 40px 0 36px;
+}
+.hero-inner { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: center; }
+@media (min-width: 900px) { .hero-inner { grid-template-columns: 1fr 1fr; gap: 36px; } }
+.eyebrow { margin: 0; color: #a39d8f; font-size: 14px; }
+h1 { font-family: var(--brush); font-weight: 400; font-size: clamp(36px, 9vw, 52px); line-height: 1.2; margin: 6px 0 12px; letter-spacing: 0.04em; white-space: nowrap; }
+.lead { font-size: 17px; color: #ddd6c7; margin: 0 0 20px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 0; }
+.btn {
+  display: inline-block; padding: 10px 22px; border-radius: 10px; text-decoration: none; font-weight: 700;
+  background: #f3ede0; color: var(--sumi); border: 2px solid transparent;
+}
+.btn.primary { background: var(--kin); border-color: #f3d27a; }
+.btn:hover { filter: brightness(1.05); }
+.hero-gif { margin: 0; }
+.hero-gif img { border-radius: 12px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45); }
+.hero-gif figcaption { color: #a39d8f; font-size: 13px; margin-top: 8px; }
+
+/* 目次 */
+.toc {
+  display: flex; flex-wrap: wrap; gap: 8px; padding-top: 20px; padding-bottom: 4px;
+}
+.toc a {
+  font-size: 14px; text-decoration: none; color: var(--sumi); background: var(--paper);
+  border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px;
+}
+.toc a:hover { border-color: var(--kin); }
+
+/* 本文 */
+main { padding-bottom: 40px; }
+section { padding-top: 40px; }
+h2 {
+  font-family: var(--mincho); font-size: 28px; line-height: 1.4; margin: 0 0 16px;
+  padding-bottom: 8px; border-bottom: 2px solid var(--kin);
+}
+h3 { font-size: 19px; margin: 32px 0 8px; }
+p { margin: 0 0 14px; }
+
+.facts { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 0 0 20px; }
+@media (min-width: 700px) { .facts { grid-template-columns: repeat(3, 1fr); } }
+.fact { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; }
+.fact b { display: block; font-family: var(--mincho); font-size: 20px; color: var(--shu); }
+.fact span { font-size: 14px; color: var(--dim); }
+
+.points { padding-left: 1.2em; margin: 0 0 14px; }
+.points li { margin-bottom: 8px; }
+.points b { color: var(--sumi); }
+
+figure { margin: 0; }
+figcaption { font-size: 14px; color: var(--dim); margin-top: 6px; }
+.shot { margin: 8px 0 20px; }
+.shot img, .steps img, .gallery img { border-radius: 10px; border: 1px solid var(--line); background: var(--night); }
+.two { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 700px) { .two { grid-template-columns: 1fr 1fr; } }
+
+/* 手順 */
+.steps { list-style: none; counter-reset: step; padding: 0; margin: 0; display: grid; gap: 14px; }
+.steps li {
+  counter-increment: step; display: grid; grid-template-columns: 1fr; gap: 12px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 14px;
+}
+@media (min-width: 700px) { .steps li { grid-template-columns: 300px 1fr; align-items: center; } }
+.steps b { display: flex; align-items: center; gap: 10px; font-size: 19px; }
+.steps b::before {
+  content: counter(step); display: inline-grid; place-items: center; width: 30px; height: 30px; flex: none;
+  border-radius: 50%; background: var(--kin); color: var(--sumi); font-size: 15px;
+}
+.steps p { margin: 6px 0 0; }
+
+/* 表 */
+.table { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 8px 0 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; line-height: 1.6; }
+th, td { padding: 9px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+th { background: #efe6d2; font-weight: 700; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: none; }
+td.num, th.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+#sake-table td:first-child, #event-table td:first-child, #role-table td:first-child { white-space: nowrap; }
+.dim { color: var(--dim); }
+.kind { display: inline-block; font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 1px 10px; white-space: nowrap; }
+.kind-good { background: #e3eedb; color: var(--good); }
+.kind-bad { background: #f5ddd7; color: var(--shu); }
+.kind-choice { background: #dbe6ee; color: var(--ai); }
+.piece {
+  display: inline-grid; place-items: center; width: 24px; height: 26px; margin-right: 8px; vertical-align: -6px;
+  font-family: var(--mincho); font-weight: 700; font-size: 14px;
+  clip-path: polygon(50% 0, 88% 22%, 100% 100%, 0 100%, 12% 22%);
+}
+.piece-any { background: #ead7ad; }
+.piece-spec { background: #dcb65c; }
+.piece-ability { background: #b5c6d3; }
+.bar { display: inline-block; width: calc(var(--w) * 0.9); max-width: 120px; height: 8px; border-radius: 4px; background: var(--kin); margin-right: 8px; vertical-align: 1px; }
+@media (max-width: 600px) { .bar { display: none; } }
+
+/* 画面 */
+.gallery { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 600px) { .gallery { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 960px) { .gallery { grid-template-columns: 1fr 1fr 1fr; } }
+
+.sources { padding-left: 1.2em; }
+.sources li { margin-bottom: 6px; }
+
+.foot { background: var(--night-deep); color: #a39d8f; font-size: 14px; padding: 24px 0; }
+.foot p { margin: 0 0 4px; }

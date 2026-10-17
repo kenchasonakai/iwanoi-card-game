@@ -1,8 +1,10 @@
 // シードを固定した自動プレイ。画面と同じルールのモジュールを使う。
 // 方針は人より下手なので、数字の傾向を見るためのもの。
-//   pnpm sim            すべての方針を 2,000 回ずつ
-//   pnpm sim 500        回数を変える
+//   pnpm sim                                  すべての方針を 2,000 回ずつ
+//   pnpm sim 500                              回数を変える
+//   pnpm sim 2000 --json guide/sim-results.json  結果を JSON にも書く（ルールと資料のページが読む）
 
+import { writeFileSync } from "node:fs";
 import { ROLES, SAKE, SAKES, TURNS, type Role, type SakeId } from "../src/game/cards.ts";
 import * as A from "../src/game/actions.ts";
 import { newGame, type GameState } from "../src/game/state.ts";
@@ -130,13 +132,18 @@ function run(policy: Policy, n: number, over: Partial<Params> = {}, note = "") {
   scores.sort((a, b) => a - b);
   const q = (p: number) => scores[Math.min(scores.length - 1, Math.floor(scores.length * p))] ?? 0;
   const mean = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+  const row = { label: note || policy, mean: Math.round(mean * 10) / 10, median: q(0.5), p10: q(0.1), p90: q(0.9), bankrupt: Math.round((1000 * bankrupt) / n) / 10 };
+  rows.push(row);
   console.log(
-    `${(note || policy).padEnd(26, "　")} 平均 ${mean.toFixed(1).padStart(6)}  中央 ${String(q(0.5)).padStart(4)}  ` +
-    `下位1割 ${String(q(0.1)).padStart(4)}  上位1割 ${String(q(0.9)).padStart(4)}  廃業 ${((100 * bankrupt) / n).toFixed(1).padStart(5)}%`,
+    `${row.label.padEnd(26, "　")} 平均 ${mean.toFixed(1).padStart(6)}  中央 ${String(row.median).padStart(4)}  ` +
+    `下位1割 ${String(row.p10).padStart(4)}  上位1割 ${String(row.p90).padStart(4)}  廃業 ${row.bankrupt.toFixed(1).padStart(5)}%`,
   );
 }
 
-const n = Number(process.argv[2] ?? 2000);
+const rows: { label: string; mean: number; median: number; p10: number; p90: number; bankrupt: number }[] = [];
+
+const n = Number(process.argv[2] && !process.argv[2].startsWith("--") ? process.argv[2] : 2000);
+const jsonAt = process.argv.indexOf("--json");
 console.log(`各 ${n} 回`);
 run("none", n, {}, "誰も雇わない");
 for (const cap of [3, 4, 6]) run("kurabito", n, { targetCap: cap }, `蔵人だけ 置ける力${cap}まで`);
@@ -144,3 +151,8 @@ for (const r of SPECIALISTS) run(`only:${r}`, n, {}, `${r}と蔵人`);
 run("spec", n, { targetCap: 6 }, "専門職と蔵人 置ける力6まで");
 run("spec", n, { targetCap: 8 }, "専門職と蔵人 置ける力8まで");
 for (const r of ABILITIES) run(`only:${r}`, n, { targetCap: 2, maxAbilities: 1 }, `${r}だけ足す`);
+if (jsonAt >= 0) {
+  const out = process.argv[jsonAt + 1]!;
+  writeFileSync(out, JSON.stringify({ runs: n, turns: TURNS, rows }, null, 2) + "\n");
+  console.log(`${out} に書きました`);
+}

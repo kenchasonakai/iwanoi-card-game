@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>蔵元カードゲーム ルールと資料</title>
+    <meta name="description" content="岩瀬酒造（岩の井）の酒造りを1人で遊ぶカードゲームの、ルールと資料です。" />
+    <meta name="theme-color" content="#1f2a31" />
+    <script type="module" src="./guide.ts"></script>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="wrap hero-inner">
+        <div class="hero-text">
+          <p class="eyebrow">岩瀬酒造（千葉県御宿町）× ハッカソン 試作</p>
+          <h1>蔵元カードゲーム</h1>
+          <p class="lead">岩の井の酒を造って売る、1人用のカードゲームです。素材を集め、人を雇い、酒を仕込んで出荷します。20ターン後の所持金が点数です。</p>
+          <p class="actions">
+            <a class="btn primary" href="../">遊ぶ</a>
+            <a class="btn" href="https://github.com/kenchasonakai/iwanoi-card-game/blob/main/design.md">設計書（GitHub）</a>
+          </p>
+        </div>
+        <figure class="hero-gif">
+          <img src="../docs/images/turn-flow.gif" alt="1ターン目を、イベント、雇う、買う、仕込む、置く、出荷、給料の順に進める動き" width="720" height="405" />
+          <figcaption>1ターンの動き。i240 総の舞を仕込み、蔵人2人を置いて出荷するまで</figcaption>
+        </figure>
+      </div>
+    </header>
+
+    <nav class="toc wrap" aria-label="目次">
+      <a href="#about">このゲームについて</a>
+      <a href="#play">遊び方</a>
+      <a href="#cards">札の種類</a>
+      <a href="#rules">細かい決まり</a>
+      <a href="#screens">画面</a>
+      <a href="#numbers">数字の確かめ</a>
+      <a href="#build">作り</a>
+      <a href="#sources">出典</a>
+    </nav>
+
+    <main class="wrap">
+      <section id="about">
+        <h2>このゲームについて</h2>
+        <div class="facts">
+          <div class="fact"><b>1人で10〜15分</b><span>20ターンで1回が終わります</span></div>
+          <div class="fact"><b>スマホの横画面</b><span>ブラウザだけで動き、ログインもいりません</span></div>
+          <div class="fact"><b>実在の酒が10種類</b><span>札には受賞歴や味、合う料理を載せています</span></div>
+        </div>
+        <p>岩瀬酒造は千葉県御宿町の酒蔵で、銘柄は「岩の井」です。このゲームでは、その蔵元になって酒を造って売ります。造る酒は、i240 シリーズや山廃、古酒など、実際に売られている酒です。</p>
+        <p>ハッカソンの課題のうち、「若い人が蔵のお酒を手に取る理由をつくる」に向けて作っています（想定）。遊ぶうちに酒の名前や受賞歴を覚え、終わったときの図鑑から蔵元直送ショップを見に行ける、という流れです。ゲームの中では購入や決済は扱いません。</p>
+        <h3>設計の考え方</h3>
+        <ul class="points">
+          <li><b>酒に序列をつけない。</b>どの酒も最初から造れます。素材が多い酒、時間がかかる酒と、得になる資源を酒ごとに変えています。</li>
+          <li><b>人にも序列をつけない。</b>役職の上下ではなく担当の違いです。得意な酒では1人で2マス埋め、ほかでは働けません。</li>
+          <li><b>仕組みは2つだけ。</b>「山札から引く」と「人を置く」です。交換、ライバル、品評会、季節は入れていません。</li>
+          <li><b>実話に沿う。</b>商品名、受賞歴、酒蔵の担当（酛屋など）、イベントの出来事の一部は、実際の蔵の話から作っています。実在の人の名前は使いません。</li>
+        </ul>
+      </section>
+
+      <section id="play">
+        <h2>遊び方</h2>
+        <h3>はじめ</h3>
+        <p>所持金12両、蔵人2人から始めます。手札は素材3枚、求人の場には3人が並びます。</p>
+        <figure class="shot">
+          <img src="../docs/images/rules-2.png" alt="盤面の見取り図。イベント、酒の場、自分の蔵、求人の場、雇っている人、手札、取引先、手順の札" loading="lazy" />
+          <figcaption>盤面の見方。横画面に6か所の場をすべて並べ、一目で全体が見えるようにしています</figcaption>
+        </figure>
+
+        <h3>1ターンの流れ</h3>
+        <p>1ターンは7つの手順で進みます。画面の右下に手順の札があり、いまの手順で触る場所だけが光ります。雇う・買う・仕込むは、してもしなくてもかまいません。</p>
+        <ol class="steps">
+          <li>
+            <img src="../docs/images/flow-1-event.png" alt="イベントの札が大きくめくれた画面" loading="lazy" />
+            <div><b>イベント</b><p>出来事の札が1枚めくれて、すぐ効きます。山札から素材を2枚引きます。</p></div>
+          </li>
+          <li>
+            <img src="../docs/images/flow-2-hire.png" alt="求人の場が光っている画面" loading="lazy" />
+            <div><b>雇う</b><p>求人の場から、契約金を払って人を雇います。給料は毎ターン1人1両で、雇った人は手放せません。</p></div>
+          </li>
+          <li>
+            <img src="../docs/images/flow-3-buy.png" alt="取引先が光っている画面" loading="lazy" />
+            <div><b>買う</b><p>取引先で素材を1ターン2枚まで買えます。酒の場の札で赤く縁どられた丸が、手札に足りない素材です。</p></div>
+          </li>
+          <li>
+            <img src="../docs/images/flow-5-sake.png" alt="酒の札の詳しい説明" loading="lazy" />
+            <div><b>仕込む</b><p>酒の場の札を選び、素材を手札から払って自分の蔵に置きます（3つまで）。札をタップすると、味や受賞歴、いまの手札で仕込めるかが分かります。</p></div>
+          </li>
+          <li>
+            <img src="../docs/images/flow-6-place.png" alt="人を選ぶと、置いたときに埋まるマスが出る画面" loading="lazy" />
+            <div><b>置く</b><p>雇っている人を、仕込み中の酒に置きます。人を選ぶと、置いたときに何マス埋まるかが出ます。</p></div>
+          </li>
+          <li>
+            <img src="../docs/images/flow-8-ship.png" alt="出荷の画面。売れた酒と売上と一言" loading="lazy" />
+            <div><b>出荷</b><p>置いた人の分だけおはじきが埋まり、全部埋まった酒が売れます。出荷の画面では、その酒の一言を大きく見せます。</p></div>
+          </li>
+          <li>
+            <img src="../docs/images/flow-9-salary.png" alt="給料を払う画面" loading="lazy" />
+            <div><b>給料</b><p>雇っている全員に1人1両払って、次のターンへ。手札は5枚までで、超えたら選んで捨てます。</p></div>
+          </li>
+        </ol>
+
+        <h3>終わり方</h3>
+        <div class="two">
+          <figure class="shot">
+            <img src="../docs/images/end.png" alt="20ターンの終わり。所持金、ランク、造った酒の図鑑" loading="lazy" />
+            <figcaption>20ターン後の所持金が点数です。ランクと、造った酒の図鑑が出ます</figcaption>
+          </figure>
+          <figure class="shot">
+            <img src="../docs/images/bankrupt.png" alt="廃業の画面" loading="lazy" />
+            <figcaption>給料を払うときにお金が足りないと、廃業で終わりです</figcaption>
+          </figure>
+        </div>
+        <p>ランクの目安（仮）は <span id="ranks"></span> です。</p>
+      </section>
+
+      <section id="cards">
+        <h2>札の種類</h2>
+        <p>札は4種類です。山札から引く素材札、毎ターン1枚選ばれるイベント札、表向きに並ぶ酒の札と人材札です。数字はすべて仮で、遊びながら調整します。</p>
+
+        <h3>酒の札（10枚）</h3>
+        <p>酒の札はそのまま「持ち場」になり、その上に人を置いて仕込みを進めます。得意な担当の人は、その酒で1人2マス埋めます。</p>
+        <div class="table"><table id="sake-table"></table></div>
+
+        <h3>人材札（<span id="recruit-count"></span>枚）</h3>
+        <p>給料は全員、毎ターン1両です。札には架空の名前と一言を載せています。</p>
+        <div class="table"><table id="role-table"></table></div>
+
+        <h3>素材の山札（<span id="deck-count"></span>枚）</h3>
+        <p>手札に入れ、仕込みを始めるときに払います。取引先で買うこともできます。</p>
+        <div class="table"><table id="deck-table"></table></div>
+
+        <h3>イベント札（<span id="event-count"></span>種類）</h3>
+        <p>毎ターン最初に、重みに応じてランダムに1枚選ばれます。同じ札が何度も出ることがあります。悪い札は1ターン分くらいの損までにして、1枚で廃業しないようにしています。</p>
+        <div class="table"><table id="event-table"></table></div>
+      </section>
+
+      <section id="rules">
+        <h2>細かい決まり</h2>
+        <ul class="points">
+          <li><b>同じ酒の値下がり。</b>同じ酒の2回目の出荷は80%、3回目からは60%です。営業を雇っていると1段ゆるくなります。</li>
+          <li><b>出荷の効果。</b>「次に出荷する酒」の効果は1つだけ持てます。持っている間に出た効果は何も起きません。同じターンに2本以上出荷したら、いちばん高く売れる酒にかかります。</li>
+          <li><b>売上の計算。</b>札の売上 → 値下がり → イベントの倍率 → 足し引き → 切り捨て、の順です。</li>
+          <li><b>置いた人。</b>何人でも同じ酒に置けます。置いた人は、外すまで次のターンもそのまま置いておけます。埋めたマスは、人を外しても残ります。</li>
+          <li><b>払った素材。</b>山札から引いた素材は、払うと捨て札に置き、山札が尽きたら混ぜ直します。取引先で買った素材は、払ったら取引先に戻ります。</li>
+          <li><b>お金の使いどき。</b>出荷で入ったお金は、同じターンの雇う・買うには使えません。</li>
+          <li><b>仕込みをやめる。</b>途中でやめられます。埋めたマスと払った素材は戻りません。</li>
+          <li><b>求人の入れ替え。</b>1両払うと、求人の場の3人を全部入れ替えられます（1ターン1回）。</li>
+          <li><b>廃業。</b>給料を払う時点でお金が足りないと廃業です。0両ちょうどなら続けられます。イベントで廃業にはなりません。</li>
+        </ul>
+      </section>
+
+      <section id="screens">
+        <h2>画面</h2>
+        <div class="gallery">
+          <figure><img src="../docs/images/title.png" alt="タイトル画面" loading="lazy" /><figcaption>タイトル</figcaption></figure>
+          <figure><img src="../docs/images/board-sample.png" alt="7ターン目の盤面" loading="lazy" /><figcaption>7ターン目の盤面</figcaption></figure>
+          <figure><img src="../docs/images/phone-sample.png" alt="スマホの横画面の盤面" loading="lazy" /><figcaption>スマホの横画面（844×390）</figcaption></figure>
+          <figure><img src="../docs/images/modal-recruit.png" alt="求人の札の詳しい説明" loading="lazy" /><figcaption>求人の札をタップしたところ</figcaption></figure>
+          <figure><img src="../docs/images/modal-brew.png" alt="仕込み中の酒の詳しい説明" loading="lazy" /><figcaption>仕込み中の酒。縦書きのラベル</figcaption></figure>
+          <figure><img src="../docs/images/event-choice.png" alt="選ぶ札のイベント" loading="lazy" /><figcaption>選ぶ札のイベント</figcaption></figure>
+          <figure><img src="../docs/images/event-pick.png" alt="素材を選ぶイベント" loading="lazy" /><figcaption>素材を選ぶイベント</figcaption></figure>
+          <figure><img src="../docs/images/discard.png" alt="手札を捨てる画面" loading="lazy" /><figcaption>手札が5枚を超えたとき</figcaption></figure>
+          <figure><img src="../docs/images/rules-4.png" alt="ルール説明の酒の札のページ" loading="lazy" /><figcaption>ルール説明（7ページ）</figcaption></figure>
+        </div>
+      </section>
+
+      <section id="numbers">
+        <h2>数字の確かめ</h2>
+        <p>ルールの数字は、画面と同じルールのモジュールを使う自動プレイで確かめています。雇い方の方針ごとに<span id="sim-runs"></span>回ずつ遊ばせ、20ターン後の所持金と廃業の割合を出しました。方針は人より下手なので、数字の傾向を見るためのものです。</p>
+        <div class="table"><table id="sim-table"></table></div>
+        <h3>分かったこと</h3>
+        <ul class="points">
+          <li>誰も雇わないと平均94両前後。専門職（酛屋・船頭・蔵守）と蔵人を雇うと150両前後まで伸び、雇うほど点は上がります。</li>
+          <li>その代わり、雇うほど廃業も増えます。最初の出荷の前に雇うと、序盤に給料が払えなくなりやすいです。</li>
+          <li>麹屋・仕入れ係・帳場・営業は、1人足しても点が伸びません（雇わないより少し下がる）。効果が弱すぎるので、数字を見直す予定です。</li>
+        </ul>
+      </section>
+
+      <section id="build">
+        <h2>作り</h2>
+        <div class="table"><table>
+          <thead><tr><th>役割</th><th>使うもの</th></tr></thead>
+          <tbody>
+            <tr><td>描画、演出、入力</td><td>Phaser 4（WebGL）</td></tr>
+            <tr><td>ビルドと開発サーバー</td><td>Vite</td></tr>
+            <tr><td>言語</td><td>TypeScript</td></tr>
+            <tr><td>置き場所</td><td>GitHub Pages。サーバーもログインも持たない</td></tr>
+          </tbody>
+        </table></div>
+        <ul class="points">
+          <li><b>ルールと画面を分ける。</b>ルールは Phaser に依存しないモジュールで、画面はその状態を描くだけです。同じモジュールを Node の自動プレイでも使うので、画面とシミュレーターでルールが食い違いません。このページの札の表も、同じデータから作っています。</li>
+          <li><b>画面を撮って確かめる。</b>Playwright でビルドしたゲームを開き、決まった手順でクリックして全場面と1ターンの動きを撮ります。ここの画像はすべてそれで撮ったものです。</li>
+          <li><b>スマホで読める文字。</b>盤面は1280×720で設計し、iPhone の横画面では約0.54倍になります。遊ぶのに読む文字は15px以上にしています。</li>
+          <li><b>生成AIの使いどころ。</b>点数や売上の計算はすべてルールで決め、AIには任せません。応募者の架空の名前と一言を作るのに使う予定です。</li>
+        </ul>
+      </section>
+
+      <section id="sources">
+        <h2>出典</h2>
+        <p>商品名、酒米、受賞歴は、2026年10月17日に確かめました。蔵に確認したいことも残っています。</p>
+        <ul class="sources">
+          <li><a href="https://iwanoi.base.ec/">岩の井蔵元直送オンラインショップ</a>: 商品名、酒米、受賞歴、札の一言</li>
+          <li><a href="https://www.iwanoi.com/">岩瀬酒造の公式サイト</a>: i240 の名前の由来（仕込み水の硬度 約240）、パーカーポイント</li>
+          <li><a href="https://www.atpress.ne.jp/news/202956">岩瀬酒造のプレスリリース（@Press、2020年1月15日）</a>: 東京サミットの乾杯酒、パーカーポイント95点</li>
+          <li><a href="https://www.makuake.com/project/iwanoi_koshu/">Makuake 岩瀬酒造の古酒プロジェクト</a>: クラウドファンディングの金額、酒米の値上がり</li>
+          <li><a href="https://nihonshu.com/bimy/visit/iwase/">ビミーデジタル 蔵元訪問記 岩瀬酒造</a>: 南部から来る蔵人、仕込みの体制</li>
+          <li><a href="https://taberujapan.com/sakeaward2026/">シェフが選ぶ美酒アワード2026</a>: i240 五百万石のフレンチ部門三つ星</li>
+        </ul>
+        <h3>蔵に確認したいこと</h3>
+        <ul class="points">
+          <li>パーカーポイント95点の年（資料により2016年と2017年）。札には年を入れていません。</li>
+          <li>山廃純米大吟醸は、いまの蔵元直送ショップに載っていません。札に残してよいか。</li>
+          <li>酒の札の一言、商品名、写真の使い方。写真は蔵から提供されたものだけ使います。</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <div class="wrap">
+        <p>試作版です。数字はすべて仮です。ゲームの中では購入や決済は扱いません。</p>
+        <p>20歳未満の者の飲酒は法律で禁止されています。</p>
+      </div>
+    </footer>
+  </body>
+</html>
