@@ -43,13 +43,13 @@ export interface Sake {
 }
 
 export const SAKES: readonly Sake[] = [
-  { id: "gohyaku", name: "i240 五百万石", short: "i240 五百万石", needs: { 五百万石: 1, 麹: 1, 酵母: 1 }, gauge: 2, revenue: 6, spec: "船頭", tags: ["i240"], say: "i240の原点。シェフが選ぶ美酒アワード2026のフレンチ部門で三ツ星。" },
-  { id: "fusa", name: "i240 総の舞", short: "i240 総の舞", needs: { 総の舞: 1, 麹: 1, 酵母: 1 }, gauge: 2, revenue: 7, spec: "船頭", tags: ["i240"], say: "千葉県でしか栽培されていない酒米で造る。" },
+  { id: "gohyaku", name: "i240 五百万石", short: "i240 五百万石", needs: { 五百万石: 1, 麹: 1, 酵母: 1 }, gauge: 2, revenue: 6, spec: "船頭", tags: ["i240"], say: "i240の原点。シェフが選ぶ美酒アワード2026のフレンチ部門で三つ星。" },
+  { id: "fusa", name: "i240 総の舞", short: "i240 総の舞", needs: { 総の舞: 1, 麹: 1, 酵母: 1 }, gauge: 2, revenue: 7, spec: "船頭", tags: ["i240"], say: "千葉県でしか栽培されていない酒米「総の舞」で造る。" },
   { id: "aiyama", name: "i240 愛山", short: "i240 愛山", needs: { 愛山: 1, 麹: 1, 酵母: 1 }, gauge: 2, revenue: 8, spec: "船頭", tags: ["i240"], say: "希少な酒米。上品な甘みと果実の香り。" },
-  { id: "kita", name: "i240 きたしずく", short: "i240 きたしずく", needs: { きたしずく: 1, 麹: 1, 酵母: 1 }, gauge: 2, revenue: 7, spec: "船頭", tags: ["i240", "夏酒"], say: "北海道産の酒米で造る夏酒。" },
+  { id: "kita", name: "i240 きたしずく", short: "i240 きたしずく", needs: { きたしずく: 1, 麹: 1, 酵母: 1 }, gauge: 2, revenue: 7, spec: "船頭", tags: ["i240", "夏酒"], say: "北海道の酒米「きたしずく」で造る、i240 の夏酒。" },
   { id: "karakuchi", name: "山廃純米辛口", short: "山廃純米辛口", needs: { ANY: 1, 麹: 1 }, gauge: 4, revenue: 12, spec: "酛屋", tags: ["山廃"], say: "冷やからお燗まで。全国燗酒コンテスト2021金賞。" },
-  { id: "yamahai240", name: "i240 山廃・山田錦", short: "i240 山廃山田錦", needs: { 山田錦: 1, 麹: 1, 酵母: 1 }, gauge: 4, revenue: 12, spec: "酛屋", tags: ["i240", "山廃"], say: "全国燗酒コンテスト2024金賞。" },
-  { id: "daiginjo", name: "山廃純米大吟醸", short: "山廃純米大吟醸", needs: { 山田錦: 2, 麹: 1 }, gauge: 6, revenue: 18, spec: "酛屋", tags: ["山廃", "大吟醸"], say: "当社の最高級の酒。パーカーポイントで95点。" },
+  { id: "yamahai240", name: "i240 山廃・山田錦", short: "i240 山廃山田錦", needs: { 山田錦: 1, 麹: 1, 酵母: 1 }, gauge: 4, revenue: 12, spec: "酛屋", tags: ["i240", "山廃"], say: "i240 でただひとつの山廃仕込み。全国燗酒コンテスト2024金賞。" },
+  { id: "daiginjo", name: "山廃純米大吟醸", short: "山廃純米大吟醸", needs: { 山田錦: 2, 麹: 1 }, gauge: 6, revenue: 18, spec: "酛屋", tags: ["山廃", "大吟醸"], say: "蔵でいちばん格の高い酒。パーカーポイントで95点。" },
   { id: "nakagumi", name: "純米大吟醸・山田錦30%・中汲み", short: "純米大吟醸 中汲み", label: { head: "純米大吟醸 山田錦30%", body: "中汲み" }, needs: { 山田錦: 3, 麹: 1 }, gauge: 6, revenue: 22, spec: "船頭", tags: ["山田錦30%"], say: "兵庫県産山田錦を30%まで磨き、搾りの中ほどを取り分けた酒。" },
   { id: "koshu20", name: "秘蔵古酒20年", short: "秘蔵古酒20年", needs: { ANY: 1, 麹: 1 }, gauge: 8, revenue: 22, spec: "蔵守", tags: ["古酒"], say: "20年以上の熟成。チーズやチョコレートにも合う。" },
   { id: "heiwa", name: "平・和の調べ", short: "平・和の調べ", needs: { ANY: 2, 麹: 1 }, gauge: 6, revenue: 16, spec: "蔵守", tags: ["古酒"], say: "6種の古酒をソムリエがブレンド。鴨のローストに。" },
@@ -128,7 +128,7 @@ export interface GameEvent {
 
 export const EVENTS: readonly GameEvent[] = [
   { id: "summit", kind: "嬉しいこと", weight: 1, title: "サミットの乾杯酒", effect: "次に出荷する酒の売上が1.5倍", origin: "1986年の東京サミットの晩餐会で乾杯酒に選ばれた", buff: { kind: "mult", value: 1.5, label: "次の出荷 ×1.5" } },
-  { id: "bishu", kind: "嬉しいこと", weight: 1, title: "美酒アワードの三ツ星", effect: "次に出荷するi240の売上が1.5倍", origin: "i240 五百万石が「シェフが選ぶ美酒アワード2026」のフレンチ部門で三ツ星", buff: { kind: "mult", value: 1.5, tag: "i240", label: "次のi240 ×1.5" } },
+  { id: "bishu", kind: "嬉しいこと", weight: 1, title: "美酒アワードの三つ星", effect: "次に出荷するi240の売上が1.5倍", origin: "i240 五百万石が「シェフが選ぶ美酒アワード2026」のフレンチ部門で三つ星", buff: { kind: "mult", value: 1.5, tag: "i240", label: "次のi240 ×1.5" } },
   { id: "kanzake", kind: "嬉しいこと", weight: 1, title: "燗酒コンテスト金賞", effect: "次に出荷する山廃の酒の売上が1.5倍", origin: "山廃純米辛口（2021年）とi240 山廃・山田錦（2024年）が金賞", buff: { kind: "mult", value: 1.5, tag: "山廃", label: "次の山廃 ×1.5" } },
   { id: "parker", kind: "嬉しいこと", weight: 1, title: "パーカーポイント95点", effect: "次に出荷する山廃純米大吟醸の売上が2倍", origin: "山廃純米大吟醸がパーカーポイントで95点", buff: { kind: "mult", value: 2, only: "daiginjo", label: "次の大吟醸 ×2" } },
   { id: "crowd", kind: "嬉しいこと", weight: 1, title: "クラファン大成功", effect: "好きな素材を2枚、無料でもらえる", origin: "2026年、Makuakeでのヴィンテージ古酒のクラウドファンディングが、目標30万円に対し約229万円を集めた" },

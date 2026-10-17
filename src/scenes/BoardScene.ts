@@ -274,10 +274,10 @@ export class BoardScene extends Phaser.Scene {
     const head = s.message ? `${s.message}\n` : "";
     switch (this.step) {
       case "event": return s.message;
-      case "hire": return `${head}【雇う】求人の札をタップして、雇うか決めます。給料は毎ターン1人1両。雇わないなら「次へ」。`;
-      case "buy": return `${head}【買う】取引先の素材をタップすると買えます（あと${s.buysLeft}枚）。酒の場の赤い丸が足りない素材です。`;
-      case "brew": return `${head}【仕込む】酒の場の札をタップして仕込みます。緑に光る札は、いまの手札で仕込めます。`;
-      case "place": return `${head}【置く】雇っている人をタップし、自分の蔵の酒をタップして置きます。置けたら「仕込む」。`;
+      case "hire": return `${head}【雇う】求人の札をタップすると、その人の説明と「雇う」ボタンが出ます。給料は毎ターン1人1両。雇わないなら「次へ」。`;
+      case "buy": return `${head}【買う】取引先の素材をタップすると買えます（あと${s.buysLeft}枚）。酒の場の札で、赤く縁どられた丸が足りない素材です。`;
+      case "brew": return `${head}【仕込む】酒の場の札をタップすると説明と「仕込む」ボタンが出ます。緑に光る札は、いまの手札で仕込めます。`;
+      case "place": return `${head}【置く】雇っている人の駒をタップし、自分の蔵の酒をタップして置きます。蔵人は1マス、得意な人は2マス。置けたら右下の「仕込む」。`;
     }
   }
 

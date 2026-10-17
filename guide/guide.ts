@@ -40,7 +40,7 @@ $("recruit-count").textContent = String(RECRUITS.length);
 table("role-table", ["担当", "枚数", "契約金", "効果"],
   (Object.keys(ROLES) as Role[]).map((r) => {
     const d = ROLES[r];
-    const kind = d.kind === "ability" ? "（置けない。雇っているだけで効く）" : "";
+    const kind = d.kind === "ability" ? "。置いてもマスは埋まらず、雇っているだけで効く" : "";
     // 枚数は求人の山の数。はじめからいる蔵人2人は含まない
     return [`<span class="piece piece-${d.kind}">${d.mark}</span><b>${r}</b>`, String(roleCount.get(r) ?? 0), `${d.fee}両`, esc(d.effect) + kind];
   }), [1, 2]);
@@ -60,7 +60,7 @@ table("event-table", ["札", "種類", "出る確率", "効果", "もとにな�
     `<span class="kind kind-${e.kind === "トラブル" ? "bad" : e.kind === "選ぶ札" ? "choice" : "good"}">${e.kind}</span>`,
     `${Math.round((e.weight / totalWeight) * 100)}%`,
     esc(e.effect),
-    e.origin === "架空" ? '<span class="dim">架空</span>' : esc(e.origin),
+    e.origin === "架空" ? '<span class="dim">架空の出来事</span>' : esc(e.origin),
   ]), [2]);
 
 // ランク
