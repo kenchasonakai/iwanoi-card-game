@@ -5,7 +5,7 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import { chromium } from "playwright";
 
-const OUT = "docs/images";
+const OUT = process.env["SHOT_OUT"] ?? "docs/images";
 const SHOTS: { name: string; query: string; note: string }[] = [
   { name: "board-sample", query: "?sample", note: "7ターン目の見本" },
   { name: "board-turn1", query: "?seed=1", note: "1ターン目" },
