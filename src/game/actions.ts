@@ -2,8 +2,8 @@
 // 返り値の文字列は画面に出す説明文で、空文字なら成功して特に言うことがない。
 
 import {
-  BREW_MAX, BUYS_PER_TURN, EVENTS, FIELD_SIZE, HAND_MAX, PRICE, REFRESH_FEE, ROLES, SAKE, SALARY, TURNS,
-  isRice, specialistWorks, type Buff, type Material, type Rice, type Sake, type SakeId,
+  BREW_MAX, BUYS_PER_TURN, EVENTS, FIELD_SIZE, HAND_MAX, PRICE, RANKS, REFRESH_FEE, ROLES, SAKE, SALARY, TURNS,
+  isRice, specialistWorks, type Buff, type Material, type Sake, type SakeId,
 } from "./cards.ts";
 import { weighted } from "./rng.ts";
 import { drawMaterial, drawRecruit, type GameState, type HandCard, type Worker } from "./state.ts";
@@ -89,6 +89,21 @@ export function placedCount(s: GameState): number {
   return s.workers.filter((w) => w.placedOn !== null).length;
 }
 
+/** 手順 3〜6 の操作ができるか。できなければ理由を返す */
+function blocked(s: GameState): string {
+  if (s.over) return "ゲームは終わりました。";
+  if (s.pending) return "先にイベントに答えてください。";
+  if (s.phase !== "act") return "このターンはもう仕込みました。給料を払って次のターンへ進んでください。";
+  return "";
+}
+
+/** 置ける人数を超えて置いていたら、後ろの人から外す（停電や取材で減ったとき） */
+function enforcePlaceLimit(s: GameState): void {
+  const limit = placeableCount(s);
+  const placed = s.workers.filter((w) => w.placedOn !== null);
+  for (const w of placed.slice(limit)) w.placedOn = null;
+}
+
 // ---------- ターンの進行
 
 export function startTurn(s: GameState): void {
@@ -103,6 +118,7 @@ export function startTurn(s: GameState): void {
   // 1. イベント
   s.event = weighted(EVENTS, (e) => e.weight, s.rng);
   s.message = applyEvent(s);
+  enforcePlaceLimit(s);
   // 2. 引く
   const n = 2 + (hasRole(s, "仕入れ係") ? 1 : 0);
   for (let i = 0; i < n; i++) {
@@ -182,7 +198,7 @@ export function answerYes(s: GameState): string {
   if (!p) return "";
   switch (p.type) {
     case "breakdown": s.money -= 2; s.pending = null; return "2両払いました。";
-    case "interview": s.temp.minusWorkers += 1; s.buff = { kind: "add", value: 4, label: "次の出荷 +4両" }; s.pending = null; return "取材を受けました。置ける人が1人減ります。";
+    case "interview": s.temp.minusWorkers += 1; enforcePlaceLimit(s); s.buff = { kind: "add", value: 4, label: "次の出荷 +4両" }; s.pending = null; return "取材を受けました。置ける人が1人減ります。";
     case "newrice": s.money -= 3; s.pending = { type: "pickMaterials", title: p.title, left: 2, onlyRice: true }; return "好きな米を2枚選んでください。";
     case "tasting": s.money -= 2; s.buff = { kind: "mult", value: 1.5, label: "次の出荷 ×1.5" }; s.pending = null; return "試飲会に出店しました。";
     case "pickMaterials": return "";
@@ -211,7 +227,7 @@ export function pickMaterial(s: GameState, m: Material): string {
 // ---------- 3. 雇う
 
 export function hire(s: GameState, recruitId: number): string {
-  if (s.pending) return "先にイベントに答えてください。";
+  const no = blocked(s); if (no) return no;
   const i = s.field.findIndex((r) => r.id === recruitId);
   if (i < 0) return "";
   const r = s.field[i]!;
@@ -226,7 +242,7 @@ export function hire(s: GameState, recruitId: number): string {
 }
 
 export function refreshField(s: GameState): string {
-  if (s.pending) return "先にイベントに答えてください。";
+  const no = blocked(s); if (no) return no;
   if (s.refreshedField) return "入れ替えは1ターン1回です。";
   if (s.money < REFRESH_FEE) return "お金が足りません。";
   s.money -= REFRESH_FEE;
@@ -240,7 +256,7 @@ export function refreshField(s: GameState): string {
 // ---------- 4. 買う
 
 export function buy(s: GameState, m: Material): string {
-  if (s.pending) return "先にイベントに答えてください。";
+  const no = blocked(s); if (no) return no;
   if (s.buysLeft <= 0) return `取引先は1ターン${BUYS_PER_TURN}枚までです。`;
   const p = s.freeBuyLeft ? 0 : priceOf(s, m);
   if (s.money < p) return "お金が足りません。";
@@ -254,7 +270,7 @@ export function buy(s: GameState, m: Material): string {
 // ---------- 5. 仕込みを始める
 
 export function startBrew(s: GameState, id: SakeId): string {
-  if (s.pending) return "先にイベントに答えてください。";
+  const no = blocked(s); if (no) return no;
   if (s.brews.some((b) => b.sake === id)) return "すでに仕込んでいます。";
   if (s.brews.length >= BREW_MAX) return `自分の蔵には${BREW_MAX}枚までです。`;
   const sake = SAKE[id];
@@ -271,6 +287,7 @@ export function startBrew(s: GameState, id: SakeId): string {
 
 /** 途中でやめる。埋めたマスと素材は戻らない */
 export function quitBrew(s: GameState, id: SakeId): string {
+  const no = blocked(s); if (no) return no;
   const i = s.brews.findIndex((b) => b.sake === id);
   if (i < 0) return "";
   s.brews.splice(i, 1);
@@ -281,7 +298,7 @@ export function quitBrew(s: GameState, id: SakeId): string {
 // ---------- 6. 人を置く
 
 export function place(s: GameState, workerId: number, id: SakeId | null): string {
-  if (s.pending) return "先にイベントに答えてください。";
+  const no = blocked(s); if (no) return no;
   const w = s.workers.find((x) => x.id === workerId);
   if (!w) return "";
   if (ROLES[w.role].kind === "ability") return `${w.role}は置いてもマスを埋められません。雇っているだけで効きます。`;
@@ -297,7 +314,7 @@ export function place(s: GameState, workerId: number, id: SakeId | null): string
 
 /** 置いた人の分だけマスを埋め、埋まった酒を出荷する。手札が多ければ捨てる段階へ */
 export function work(s: GameState): string {
-  if (s.pending) return "先にイベントに答えてください。";
+  const no = blocked(s); if (no) return no;
   // 南部からの応援は、いちばんマスの残りが少ない酒に自動で入る
   for (let i = 0; i < s.temp.extraWorkers; i++) {
     const b = s.brews.filter((x) => x.filled < SAKE[x.sake].gauge).sort((a, b) => (SAKE[a.sake].gauge - a.filled) - (SAKE[b.sake].gauge - b.filled))[0];
@@ -311,7 +328,7 @@ export function work(s: GameState): string {
     b.filled = Math.min(sake.gauge, b.filled + fillBy(w.role, sake));
   }
   ship(s);
-  s.phase = s.hand.length > HAND_MAX ? "discard" : "act";
+  s.phase = s.hand.length > HAND_MAX ? "discard" : "shipped";
   return s.lastShip.length ? `${s.lastShip.map((r) => SAKE[r.sake].name).join("、")}を出荷しました。` : "";
 }
 
@@ -335,6 +352,7 @@ function ship(s: GameState): void {
 
 /** 手札の上限を超えた分を捨てる */
 export function discardCards(s: GameState, ids: number[]): string {
+  if (s.phase !== "discard") return "";
   const need = s.hand.length - HAND_MAX;
   if (ids.length !== need) return `${need}枚選んでください。`;
   for (const id of ids) {
@@ -343,14 +361,16 @@ export function discardCards(s: GameState, ids: number[]): string {
     const [c] = s.hand.splice(i, 1);
     if (!c!.bought) s.discard.push(c!.material);
   }
-  s.phase = "act";
+  s.phase = "shipped";
   return "";
 }
 
 // ---------- 8. 給料
 
 export function paySalary(s: GameState): string {
-  if (s.hand.length > HAND_MAX) return `手札は${HAND_MAX}枚までです。先に捨ててください。`;
+  if (s.phase === "act") return "先に「仕込む」で、置いた人の分だけマスを埋めてください。";
+  if (s.phase === "discard") return `手札は${HAND_MAX}枚までです。先に捨ててください。`;
+  if (s.phase !== "shipped") return "";
   const sal = salaryTotal(s);
   if (s.money < sal) {
     s.over = { kind: "bankrupt", turn: s.turn };
@@ -369,10 +389,5 @@ export function paySalary(s: GameState): string {
 }
 
 export function rankOf(money: number): string {
-  return [[170, "S"], [140, "A"], [110, "B"], [-Infinity, "C"]].find(([min]) => money >= (min as number))![1] as string;
-}
-
-/** どの米の値段表を出すか（画面用） */
-export function riceList(): Rice[] {
-  return ["山田錦", "五百万石", "総の舞", "きたしずく", "愛山"];
+  return RANKS.find(([min]) => money >= min)![1];
 }

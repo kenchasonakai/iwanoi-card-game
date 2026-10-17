@@ -37,7 +37,13 @@ export type Pending =
   | { type: "newrice"; title: string }
   | { type: "tasting"; title: string };
 
-export type Phase = "act" | "discard" | "over";
+/**
+ * act: 雇う・買う・仕込む・置く（手順 3〜6）
+ * discard: 出荷の後、手札が上限を超えていて捨てる札を選ぶ
+ * shipped: 出荷が済み、給料を払うだけ
+ * over: 終わり
+ */
+export type Phase = "act" | "discard" | "shipped" | "over";
 
 export interface GameState {
   seed: number;
