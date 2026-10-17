@@ -89,6 +89,7 @@ const SCENES: Scene[] = [
   { name: "discard", query: "?sample=discard", view: "pc", steps: [{ click: P.handCard(1) }, { wait: 800 }, { shot: "discard", note: "手札が5枚を超えたら捨てる" }] },
   { name: "end", query: "?sample=end", view: "pc", steps: [{ click: P.main }, { wait: 900 }, { shot: "end", note: "20ターンの終わり" }] },
   { name: "bankrupt", query: "?sample=bankrupt", view: "pc", steps: [{ click: P.main }, { wait: 900 }, { shot: "bankrupt", note: "廃業" }] },
+  { name: "restart", query: "?sample", view: "pc", steps: [{ click: [486, 29] }, { wait: 600 }, { shot: "restart", note: "途中で最初からやり直す" }] },
   { name: "phone", query: "?sample", view: "phone", steps: [{ shot: "phone-sample", note: "スマホの横画面" }] },
 ];
 
@@ -108,6 +109,7 @@ async function waitFor(url: string, ms = 20000) {
 
 async function run(browser: Browser, base: string, sc: Scene) {
   const videoDir = join(OUT, `.video-${sc.name}`);
+  rmSync(videoDir, { recursive: true, force: true }); // 前に失敗したときの録画を残さない
   const context = await browser.newContext({
     ...VIEWPORTS[sc.view],
     ...(sc.gif ? { deviceScaleFactor: 1, recordVideo: { dir: videoDir, size: VIEWPORTS[sc.view].viewport } } : {}),
@@ -117,7 +119,7 @@ async function run(browser: Browser, base: string, sc: Scene) {
   page.on("console", (m) => { if (m.type() === "error") console.error(`[${sc.name}] console:`, m.text()); });
   const t0 = Date.now();
   await page.goto(`${base}/${sc.query}`);
-  await page.waitForFunction(() => (window as unknown as { __ready?: boolean }).__ready === true, null, { timeout: 20000 });
+  await page.waitForFunction(() => (window as unknown as { __ready?: boolean }).__ready === true, null, { timeout: 40000 });
   const readyAt = (Date.now() - t0) / 1000;
   // Phaser は画面の大きさを 0.5 秒ごとに測り直すので、読み込み直後のタップは座標がずれることがある
   await page.waitForTimeout(1500);
@@ -161,7 +163,15 @@ try {
   await waitFor(`${base}/`);
   mkdirSync(OUT, { recursive: true });
   const browser = await chromium.launch({ channel: "chrome" }); // 端末の Chrome を使う
-  for (const sc of SCENES.filter((x) => !only || x.name.includes(only))) await run(browser, base, sc);
+  for (const sc of SCENES.filter((x) => !only || x.name.includes(only))) {
+    // WSL ではネットワークが切り替わって読み込みが落ちる（ERR_NETWORK_CHANGED）ことがあるので、2 回まで撮り直す
+    for (let attempt = 1; ; attempt++) {
+      try { await run(browser, base, sc); break; } catch (e) {
+        if (attempt >= 3) throw e;
+        console.error(`[${sc.name}] 撮り直します（${attempt}回目の失敗）: ${(e as Error).message.split("\n")[0]}`);
+      }
+    }
+  }
   await browser.close();
 } finally {
   server?.kill();

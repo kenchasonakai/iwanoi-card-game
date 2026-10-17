@@ -20,7 +20,8 @@ type Modal =
   | { type: "recruit"; id: number }
   | { type: "worker"; id: number }
   | { type: "event" }
-  | { type: "ship" };
+  | { type: "ship" }
+  | { type: "restart" };
 
 /**
  * ターンの中の手順。画面はこの順に 1 つずつ案内し、触る場所だけを光らせる。
@@ -90,7 +91,9 @@ export class BoardScene extends Phaser.Scene {
 
     this.startFromUrl();
     // 書体の一部が後から届いたら描き直す（日本語の書体は文字の範囲ごとに分かれて届く）
-    document.fonts.addEventListener("loadingdone", () => this.render());
+    const redraw = () => this.render();
+    document.fonts.addEventListener("loadingdone", redraw);
+    this.events.once("shutdown", () => document.fonts.removeEventListener("loadingdone", redraw));
 
     const w = window as unknown as Record<string, unknown>;
     w["__kura"] = { scene: this, state: () => this.s };
@@ -121,6 +124,7 @@ export class BoardScene extends Phaser.Scene {
   }
 
   private makeTextures() {
+    if (this.textures.exists("coin")) return; // 始め直したときは作ってある
     const g = this.add.graphics();
     g.fillStyle(C.kinDeep, 1).fillEllipse(11, 8, 22, 15);
     g.fillStyle(C.kin, 1).fillEllipse(11, 7, 20, 13);
@@ -203,7 +207,11 @@ export class BoardScene extends Phaser.Scene {
   private drawTop() {
     const s = this.s, d = this.d;
     d.text(22, 29, "岩瀬酒造 蔵元カードゲーム", 26, { font: F.brush, color: T.washi, oy: 0.5 });
-    d.button(350, 14, 92, 30, "ルール", () => { this.scene.pause(); this.scene.launch("rules", { from: "board" }); }, { size: S.small });
+    d.button(350, 14, 80, 30, "ルール", () => { this.scene.pause(); this.scene.launch("rules", { from: "board" }); }, { size: S.small });
+    d.button(438, 14, 96, 30, "最初から", () => {
+      // 終わった後はそのまま始め直す。途中なら確かめる
+      if (this.s.over) this.newGame(); else { this.modal = { type: "restart" }; this.render(); }
+    }, { size: S.small });
     // ターン。数字と 20 個の点
     d.text(W / 2, 21, `${s.turn}`, S.big, { color: T.washi, bold: true, ox: 1, oy: 0.5 });
     d.text(W / 2 + 4, 24, `/ ${TURNS} ターン`, S.body, { color: T.chalkDim, oy: 0.5 });
@@ -484,7 +492,7 @@ export class BoardScene extends Phaser.Scene {
     });
     const by = Z.y + 58, bh = 106;
     if (s.over) {
-      d.button(Z.x, by, Z.w, bh, "もう一度", () => restart(), { primary: true, size: S.title });
+      d.button(Z.x, by, Z.w, bh, "もう一度", () => this.newGame(), { primary: true, size: S.title });
     } else if (s.phase === "discard") {
       const need = s.hand.length - HAND_MAX;
       d.button(Z.x, by, Z.w, bh, `${this.discardSel.length} / ${need}枚を捨てる`, () => {
@@ -598,6 +606,7 @@ export class BoardScene extends Phaser.Scene {
       case "worker": return this.drawWorkerModal(m.id);
       case "event": return this.drawEventModal();
       case "ship": return this.drawShipModal();
+      case "restart": return this.drawRestartModal();
     }
   }
 
@@ -704,6 +713,23 @@ export class BoardScene extends Phaser.Scene {
     d.text(x + 640, y + 360 - 30 - 24, `この札が出る確率 ${Math.round((ev.weight / total) * 100)}%`, S.small, { color: T.dim, ox: 1, oy: 0.5 });
   }
 
+  /** 新しい山札で、1ターン目のイベントから始め直す。ページは読み込み直さない */
+  private newGame() {
+    this.modal = null;
+    this.selectedWorker = null;
+    this.discardSel = [];
+    this.scene.restart({ seed: Math.floor(Math.random() * 100000) });
+  }
+
+  private drawRestartModal() {
+    const s = this.s, d = this.d;
+    const { x, y } = this.panel(600, 290);
+    d.text(x + 40, y + 34, "最初からやり直しますか？", S.big, { font: F.mincho, bold: true });
+    d.text(x + 40, y + 90, `いまは${s.turn}ターン目、所持金${s.money}両です。やり直すと、新しい山札と求人で1ターン目から始まり、いまの蔵は消えます。`, S.body + 1, { wrap: 520, lineSpacing: 5 });
+    d.button(x + 40, y + 290 - 36 - 56, 240, 56, "最初からやり直す", () => this.newGame(), { danger: true, size: S.strong });
+    d.button(x + 600 - 40 - 240, y + 290 - 36 - 56, 240, 56, "続ける", this.close, { primary: true, size: S.strong });
+  }
+
   private drawShipModal() {
     const s = this.s, d = this.d;
     const rs = s.lastShip;
@@ -791,7 +817,7 @@ export class BoardScene extends Phaser.Scene {
       this.toast("結果をコピーしました");
     }, { size: S.strong, sub: "LINE などに貼れます" });
     d.button(x + 310, by, 280, 56, "蔵元直送ショップを見る", () => window.open(SHOP_URL, "_blank", "noopener"), { size: S.strong, sub: "岩の井のお酒を見る（外部サイト）" });
-    d.button(x + w - 50 - 240, by, 240, 56, "もう一度", () => restart(), { primary: true, size: S.title });
+    d.button(x + w - 50 - 240, by, 240, 56, "もう一度", () => this.newGame(), { primary: true, size: S.title });
     d.text(x + 50, y + h - 32, "20歳未満の者の飲酒は法律で禁止されています。ゲームの中では購入や決済は扱いません。", S.small, { color: T.dim });
   }
 
@@ -829,6 +855,3 @@ function shareText(s: GameState): string {
   return `岩瀬酒造 蔵元カードゲーム（試作）で${TURNS}ターン。所持金${s.money}両、ランク${A.rankOf(s.money)}。造った酒: ${made}`;
 }
 
-function restart() {
-  location.search = `?seed=${Math.floor(Math.random() * 100000)}`;
-}
